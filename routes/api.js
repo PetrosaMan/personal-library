@@ -23,27 +23,53 @@ mongoose
     console.log("Couldn't connect to MongoDB");
   });
 
-// mongoose book schema
-const BookSchema = new Schema({
+// mongoose bookSchema
+const bookSchema = new Schema({
   title: { type: String, required: true },
-  comments: [String],
+  comments: [Number],
 });
-// mongoose moddle
-const Book = mongoose.model("Book", BookSchema);
 
-exports.Book = Book;
+// define mongoose model
+const Book = mongoose.model("Book", bookSchema);
+
+module.exports = { Book };
 
 module.exports = function (app) {
   app
     .route("/api/books")
-    .get(function (req, res) {
+    .get( async function (req, res) { 
+      let arrayOfBooks;      
+      await Book.find({})
+      .then((arrayOfBooks) => {        
+          return res.json(arrayOfBooks);
+      });               
+      
       //response will be array of book objects
       //json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
-    })
+    })     
 
-    .post(function (req, res) {
+    .post( async function (req, res) {
       let title = req.body.title;
-      //response will contain new book object including atleast _id and title
+      //console.log('new title: ', req.body.title);
+
+      if (await Book.exists({title: title})) {
+        return res.json({ error: title + " already exists in library" });
+      }
+      
+     try {
+        // create new book
+        let newBook = new Book ({
+          title: title,
+          comments:[]
+        });
+        // save new book
+        await newBook.save();
+        // respond with saved book
+        return res.json(newBook);
+     } catch {
+        // Handle errors
+        res.status(500).json({ error: "string missing required field title"});
+     }       
     })
 
     .delete(function (req, res) {
