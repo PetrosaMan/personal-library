@@ -24,9 +24,10 @@ mongoose
   });
 
 // mongoose bookSchema
-const bookSchema = new Schema({
+const bookSchema = new Schema({    
   title: { type: String, required: true },
-  comments: [Number],
+  commentcount: Number,
+  comments: [String],
 });
 
 // define mongoose model
@@ -50,25 +51,30 @@ module.exports = function (app) {
 
     .post( async function (req, res) {
       let title = req.body.title;
-      //console.log('new title: ', req.body.title);
+      
+      if(!title) {
+        return res.status(400).json({ error: "Title is required"});
+      };
 
       if (await Book.exists({title: title})) {
-        return res.json({ error: title + " already exists in library" });
+        return res.status(400).json({ error: title + " already exists in library" });
       }
       
-     try {
+      try {
         // create new book
-        let newBook = new Book ({
+        let newBook = new Book ({           
           title: title,
-          comments:[]
+          commentcount: 0,
+          comments:[''],
         });
+        
         // save new book
         await newBook.save();
-        // respond with saved book
-        return res.json(newBook);
+        // respond with saved book        
+        return res.status(200).json({ title:newBook.title, _id: newBook._id});
      } catch {
         // Handle errors
-        res.status(500).json({ error: "string missing required field title"});
+        res.status(500).json({ error: "Internal server error"});
      }       
     })
 
