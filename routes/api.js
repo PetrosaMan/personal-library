@@ -25,9 +25,9 @@ mongoose
 
 // mongoose bookSchema
 const bookSchema = new Schema({    
-  title: { type: String, required: true },
-  commentcount: Number,
+  title: { type: String, required: true },  
   comments: [String],
+  commentcount: Number
 });
 
 // define mongoose model
@@ -43,17 +43,14 @@ module.exports = function (app) {
       await Book.find({})
       .then((arrayOfBooks) => {        
           return res.json(arrayOfBooks);
-      });               
-      
-      //response will be array of book objects
-      //json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
+      });       
     })     
 
     .post( async function (req, res) {
       let title = req.body.title;
       
       if(!title) {
-        return res.status(400).json({ error: "Title is required"});
+        return res.status(400).json({ error: "missing required field title"});
       };
 
       if (await Book.exists({title: title})) {
@@ -62,10 +59,10 @@ module.exports = function (app) {
       
       try {
         // create new book
-        let newBook = new Book ({           
-          title: title,
-          commentcount: 0,
-          comments:[''],
+        let newBook = new Book ({
+          title: title,          
+          comments:[],
+          commentcount: 0
         });
         
         // save new book
@@ -89,9 +86,31 @@ module.exports = function (app) {
       //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
     })
 
-    .post(function (req, res) {
+    .post( async function (req, res) {
       let bookid = req.params.id;
       let comment = req.body.comment;
+      console.log(comment)
+      console.log(bookid);
+      
+      try {
+      const foundBook = await Book.findById(bookid);
+
+      if(!foundBook) {
+        console.log('Book not found');
+        return;
+      }
+
+      foundBook.comments.push(comment); // add comment
+      foundBook.commentcount += 1;
+      // save updated book
+      const updatedBook = await foundBook.save();
+      console.log("Updated book", updatedBook)
+    } catch (error) { 
+        console.error("Error updating book: ", error);
+    }      
+      //if(!comment) {
+      //  return res.status(400).json("missing required field comment");
+      //}           
       //json res format same as .get
     })
 
