@@ -54,9 +54,7 @@ module.exports = function (app) {
         return res.json("missing required field title");
       }
       if (await Book.exists({ title: title })) {
-        return res
-          .status(400)
-          .json({ error: title + " already exists in library" });
+        return res.json({ error: title + " already exists in library" });
       }
       try {
         // create new book
@@ -67,7 +65,7 @@ module.exports = function (app) {
         });
         await newBook.save();
         // respond with saved book
-        return res.status(200).json({ title: newBook.title, _id: newBook._id });
+        return res.json({ title: newBook.title, id: newBook._id });
       } catch {
         // Handle errors
         res.status(500).json({ error: "Internal server error" });
