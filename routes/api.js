@@ -39,9 +39,14 @@ module.exports = function (app) {
     .route("/api/books")
     .get(async function (req, res) {
       let arrayOfBooks;
-      await Book.find({}).then((arrayOfBooks) => {
-        return res.json(arrayOfBooks);
-      });
+      await Book.find().then((arrayOfBooks) => {
+        //return res.json(arrayOfBooks);
+        let books=[];
+        for (const {title, id, commentcount} of arrayOfBooks) {
+          books.push({ title, id, commentcount });
+        };
+        return res.json(books);
+      });      
     })
     .post(async function (req, res) {
       let title = req.body.title;
