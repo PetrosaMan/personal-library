@@ -46,7 +46,7 @@ module.exports = function (app) {
     .post(async function (req, res) {
       let title = req.body.title;
       if (!title) {
-        return res.status(400).json({ error: "missing required field title" });
+        return res.json("missing required field title");
       }
       if (await Book.exists({ title: title })) {
         return res
@@ -71,6 +71,8 @@ module.exports = function (app) {
 
     .delete(function (req, res) {
       //if successful response will be 'complete delete successful'
+      console.log("route/api/books", "delete req");
+
     });
 
   app
@@ -82,7 +84,7 @@ module.exports = function (app) {
         if(!foundBook) {
           return res.json("No book exists");
         }
-        return res.json({ foundBook });
+        return res.json( foundBook );
       } catch (error) {
           res.json("error");
       }
@@ -113,8 +115,13 @@ module.exports = function (app) {
       //json res format same as .get
     })
 
-    .delete(function (req, res) {
-      let bookid = req.params.id;
-      //if successful response will be 'delete successful'
+    .delete(async function (req, res) {
+      let bookid = req.params.id;      
+      try {
+        await Book.deleteOne({_id: bookid});
+        res.json('delete successful');
+      } catch (error) {
+        res.json('no book found'); 
+      }
     });
 };
