@@ -37,21 +37,17 @@ module.exports = { Book };
 module.exports = function (app) {
   app
     .route("/api/books")
-    .get(async function (req, res) {
+    .get(async function (req, res) {      
       try {
-      let arrayOfBooks;
-      await Book.find().then((arrayOfBooks) => {
+      const arrayOfBooks = await Book.find();
         //return res.json(arrayOfBooks);
-        let books=[];
-        for (const {title, _id, commentcount} of arrayOfBooks) {
-          books.push({ title, _id, commentcount });
-        };
-        res.json(books);
-        return;
-      }); 
-    } catch (err) {
-        res.json([]);
-    }            
+        let books= arrayOfBooks.map(({ title, _id, comments, commentcount}) => ({
+          title, _id, comments, commentcount
+        }));        
+        res.json(books);                 
+      } catch (err) {
+          res.status(500).json({error: "Internal Server Error"});
+        }            
     })
     .post(async function (req, res) {
       let title = req.body.title;
