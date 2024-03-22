@@ -41,80 +41,83 @@ module.exports = function (app) {
       try {
       const arrayOfBooks = await Book.find();
         //return res.json(arrayOfBooks);
-        let books= arrayOfBooks.map(({ title, _id, comments, commentcount}) => ({
-          title, _id, comments, commentcount
+        let books= arrayOfBooks.map(({ title, _id, commentcount}) => ({
+          title, _id, commentcount
         }));        
         res.json(books);                 
       } catch (err) {
-          res.status(500).json({error: "Internal Server Error"});
+          res.json({error: "%%Internal Server Error"});
         }            
     })
     .post(async function (req, res) {
-      let title = req.body.title;
+      try {
+      let title = req.body.title;     
       if (!title || title == '') { 
-        return res.json("missing required field title");
+        return json('missing required field title');
       }
-      //Not asked for by FCC project so maybe leave it out?
-      if (await Book.exists({ title: title })) {
-        return res.json("title already exists" );
-      }      
+      //Note duplicate book titles ARE allowed in the fcc api
+      // This would allow a new revision as separate book
+      //if (await Book.exists({ title: title })) {
+      //  return json('title already exists');
+      //}      
         // create new book
         let newBook = new Book({
           title: title,
           comments: [],
           commentcount: 0,
-        });
-        try {
+        });         
         const result = await newBook.save();
         // respond with saved book
+        console.log('newBook ', result);
         res.json({ title: result.title, _id: result._id });
       } catch (err) {
         // Handle errors
-        res.status(500).send({ error: "book POST error" });
+        res.json('missing required field title');
       }
     })
-
-    .delete(async function (req, res) {
-      //if successful response will be 'complete delete successful'
+    .delete(async function (req, res) {      
       // delete all books
+      console.log('all books delete function');
       try {
-          const deletedAllBooks = await Book.deleteMany();
-          console.log("deleted all books", deletedAllBooks);          
-            res.send('complete delete successful');          
+          await Book.deleteMany();                    
+          res.json('complete delete successful');          
       } catch (err) {
-          res.send("err")
+          res.json({err:"Internal @@ server Error"});
       }
     });
 
   app
     .route("/api/books/:id")
     .get( async function (req, res) {
-      let bookid = req.params.id;
       try {
-        if( bookid == '' || !bookid) {
-          return res.json("no book exists");
-        }
+      let bookid = req.params.id;      
+      if(!bookid) {
+          return res.json('no book exists');
+      }
         const foundBook = await Book.findById(bookid);
         if(!foundBook) {
-          return res.json('no book exists');
+          return res.json("no book exists");
         }        
-        return res.json( foundBook );
-      } catch (error) {
-          res.status(500).json("api/book/:id get error");
+        return res.json({ 
+          title: foundBook.title,
+          _id: foundBook._id ,
+          comments: foundBook.comments });
+      } catch (err) {
+          res.json({error: "Internal ?? Server Error" });
       }
       //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
     })
 
     .post(async function (req, res) {
+      try {
       let bookid = req.params.id;
       let comment = req.body.comment;       
       if(!comment || comment == '') {
-          return res.json("missing required field comment")
-      }
-      try {    
-        const foundBook = await Book.findById(bookid);
+          return json('missing required field comment');
+      }          
+      const foundBook = await Book.findById(bookid);
         if (!foundBook) {
-          return res.json("no book exists");          
+          return res.json('no book exists');          
         }
         // add comment  to array
         foundBook.comments.push(comment);
@@ -123,27 +126,23 @@ module.exports = function (app) {
         // save updated book
         const updatedBook = await foundBook.save();
         res.json({ updatedBook });
-      } catch (error) {
+      } catch (err) {
         /// check if format ok in sending ALL fields back
-         res.send("no book exists");
+         res.json( 'missing required field comment');
       }      
       //json res format same as .get???
     })
 
-    .delete(async function (req, res) {
-      let bookid = req.params.id;
-      console.log("delete book: ", bookid);     
-      try {
-        // maybe delete the if an just use the catch??
-        if(!bookid || bookid == '') {
-          return res.json('no book exists');
-        }
-        // check the format of the parameter required in deleteOne
-        const result = await Book.deleteOne({_id: bookid});
-        // maybe try : if(result) { res.json('delete successful)} else { res.json('no bokk exists')}
-        res.send('delete successful');
-      } catch (error) {
-        res.send('no book exists'); 
-      }
-    });
+    .delete( async function (req, res) {
+      // if successful response: 'complete delete successful
+      let bookid =req.params.id      
+      console.log("bookId: ", bookid);
+      try { 
+        await Book.findByIdAndDelete(bookid)
+        res.json('delete successful')
+      } catch(err) {
+        res.json('no book exists')
+      }      
+    });       
+    
 };
