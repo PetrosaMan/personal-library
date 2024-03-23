@@ -45,10 +45,10 @@ suite('Functional Tests', function() {
         .keepOpen()
         .post('/api/books')
         .send({ title: 'test-title' })
-        .end(function(err, res) {           
-          assert.equal(res.status, 200);
-          const bookID =res.body._id;
-          assert.equal(res.body.title, undefined);
+        .end(function(err, res) { 
+          const bookID =res.body._id;          
+          assert.equal(res.status, 200);          
+          assert.equal(res.body.title, 'test-title');
           done();
         });              
       });
@@ -59,12 +59,13 @@ suite('Functional Tests', function() {
         .keepOpen()
         .post("/api/books")
         .send({})
-        .end(function(err, res) {
-          assert.equal(res.status, 200);                   
-          assert.equal(res.text, 'missing required field title');
+        .end(function(err, res) {           
+          assert.equal(res.status, 200);                              
+          assert.equal(res.text, '"missing required field title"');
           done();
         });                       
-      });     
+      }); 
+
     });
 
 

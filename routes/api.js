@@ -71,7 +71,7 @@ module.exports = function (app) {
         console.log('newBook ', result);
         res.json({ title: result.title, _id: result._id });
       } catch (err) {
-        // Handle errors
+        // Handle errors added 
         res.json('missing required field title');
       }
     })
@@ -113,11 +113,11 @@ module.exports = function (app) {
       let bookid = req.params.id;
       let comment = req.body.comment;       
       if(!comment || comment == '') {
-          return json('missing required field comment');
+          return res.json({ error: 'missing required field comment'});
       }          
       const foundBook = await Book.findById(bookid);
         if (!foundBook) {
-          return res.json('no book exists');          
+          return res.json({ error:'no book exists' });          
         }
         // add comment  to array
         foundBook.comments.push(comment);
@@ -128,7 +128,7 @@ module.exports = function (app) {
         res.json({ updatedBook });
       } catch (err) {
         /// check if format ok in sending ALL fields back
-         res.json( 'missing required field comment');
+        res.status(500).json({ error: 'Internal Server Error'});
       }      
       //json res format same as .get???
     })
