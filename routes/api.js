@@ -41,8 +41,8 @@ module.exports = function (app) {
       try {
       const arrayOfBooks = await Book.find();
         //return res.json(arrayOfBooks);
-        let books= arrayOfBooks.map(({ title, _id, commentcount}) => ({
-          title, _id, commentcount
+        let books= arrayOfBooks.map(({ title, _id, commentcount, comments}) => ({
+           title, _id, commentcount
         }));        
         res.json(books);                 
       } catch (err) {
@@ -64,7 +64,12 @@ module.exports = function (app) {
         const result = await newBook.save();
         // respond with saved book
         //console.log('newBook ', result);
-        res.json({ title: result.title, _id: result._id });
+        res.json({
+          comments: result.comments,          
+          _id: result._id,
+          title: result.title,
+          commentcount: result.commentcount
+         });
       } catch (err) {
         // Handle errors added 
         res.json("missing required field title");
@@ -82,10 +87,10 @@ module.exports = function (app) {
     });
 
   app
-    .route("/api/books/:id")
+    .route("/api/books/:_id")
     .get( async function (req, res) {
       try {
-      let bookid = req.params.id;      
+      let bookid = req.params._id;      
       if(!bookid) {
           return res.json("no book exists");
       }
@@ -105,7 +110,7 @@ module.exports = function (app) {
 
     .post(async function (req, res) {
       try {
-      let bookid = req.params.id;
+      let bookid = req.params._id;
       let comment = req.body.comment;       
       if(!comment || comment == '') {
           return res.json({ error: "missing required field comment"});
@@ -119,8 +124,11 @@ module.exports = function (app) {
         // increment count 
         foundBook.commentcount += 1;      
         // save updated book
-        const updatedBook = await foundBook.save();
-        res.json({ updatedBook });
+        const book = await foundBook.save();
+        res.json({ 
+          title: book.title,
+          _id: book._id,
+          comments: book.comments });
       } catch (err) {
         /// check if format ok in sending ALL fields back
         res.status(500).json({ error: "Internal Server Error"});
@@ -130,7 +138,7 @@ module.exports = function (app) {
 
     .delete( async function (req, res) {
       // if successful response: 'complete delete successful
-      let bookid =req.params.id      
+      let bookid =req.params._id      
       console.log("bookId: ", bookid);
       try { 
         await Book.findByIdAndDelete(bookid)

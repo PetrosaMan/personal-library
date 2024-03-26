@@ -39,7 +39,7 @@ suite('Functional Tests', function() {
         
   suite('Routing tests', function() {
       
-      let id;
+      let id; 
     suite('POST /api/books with title => create book object/expect book object', function() {
       
       test('Test POST /api/books with title', function(done) {
@@ -53,7 +53,9 @@ suite('Functional Tests', function() {
           assert.equal(res.body.title, 'test-title');         
           //assert.isNotNull(res.body._id);
           id = res.body._id;
-          //console.log('id has been set as ' + _id);
+          console.log('title:', res.body.title)
+          console.log('id has been set as ' + _id);
+          console.log('comCount ', res.body.commentcount);
           done();
         }); // timeout(10000);              
       });
