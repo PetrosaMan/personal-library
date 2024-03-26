@@ -7,7 +7,7 @@
  */
 
 "use strict";
-const bodyParser = require("body-parser");
+//const bodyParser = require("body-parser");
 const mongodb = require("mongodb");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
@@ -53,13 +53,8 @@ module.exports = function (app) {
       try {
       let title = req.body.title;     
       if (!title || title == '') { 
-        return json('missing required field title');
-      }
-      //Note duplicate book titles ARE allowed in the fcc api
-      // This would allow a new revision as separate book
-      //if (await Book.exists({ title: title })) {
-      //  return json('title already exists');
-      //}      
+        return res.json("missing required field title");
+      }      
         // create new book
         let newBook = new Book({
           title: title,
@@ -68,19 +63,19 @@ module.exports = function (app) {
         });         
         const result = await newBook.save();
         // respond with saved book
-        console.log('newBook ', result);
+        //console.log('newBook ', result);
         res.json({ title: result.title, _id: result._id });
       } catch (err) {
         // Handle errors added 
-        res.json('missing required field title');
+        res.json("missing required field title");
       }
     })
     .delete(async function (req, res) {      
       // delete all books
-      console.log('all books delete function');
+      console.log("all books delete function");
       try {
           await Book.deleteMany();                    
-          res.json('complete delete successful');          
+          res.json("complete delete successful");          
       } catch (err) {
           res.json({err:"Internal @@ server Error"});
       }
@@ -92,7 +87,7 @@ module.exports = function (app) {
       try {
       let bookid = req.params.id;      
       if(!bookid) {
-          return res.json('no book exists');
+          return res.json("no book exists");
       }
         const foundBook = await Book.findById(bookid);
         if(!foundBook) {
@@ -103,7 +98,7 @@ module.exports = function (app) {
           _id: foundBook._id ,
           comments: foundBook.comments });
       } catch (err) {
-          res.json({error: "Internal ?? Server Error" });
+          res.json( "no book exists" );
       }
       //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
     })
@@ -113,11 +108,11 @@ module.exports = function (app) {
       let bookid = req.params.id;
       let comment = req.body.comment;       
       if(!comment || comment == '') {
-          return res.json({ error: 'missing required field comment'});
+          return res.json({ error: "missing required field comment"});
       }          
       const foundBook = await Book.findById(bookid);
         if (!foundBook) {
-          return res.json({ error:'no book exists' });          
+          return res.json({ error:"no book exists" });          
         }
         // add comment  to array
         foundBook.comments.push(comment);
@@ -128,7 +123,7 @@ module.exports = function (app) {
         res.json({ updatedBook });
       } catch (err) {
         /// check if format ok in sending ALL fields back
-        res.status(500).json({ error: 'Internal Server Error'});
+        res.status(500).json({ error: "Internal Server Error"});
       }      
       //json res format same as .get???
     })
@@ -139,9 +134,9 @@ module.exports = function (app) {
       console.log("bookId: ", bookid);
       try { 
         await Book.findByIdAndDelete(bookid)
-        res.json('delete successful')
+        res.json("delete successful");
       } catch(err) {
-        res.json('no book exists')
+        res.json("no book exists");
       }      
     });       
     
