@@ -143,15 +143,20 @@ module.exports = function (app) {
     })
 
     .delete( async function (req, res) {
-      // if successful response: 'complete delete successful
-      let bookid =req.params._id      
-      console.log("bookId: ", bookid);
-      try { 
-        await Book.findByIdAndDelete(bookid)
-        res.send("delete successful");
-      } catch(err) {
-        res.json("no book exists");
-      }      
-    });       
+      // if successful response: 'delete successful'
+      const bookid =req.params._id;      
+      if(!bookid) {
+        return res.send('no book exists');
+      } 
+      try {
+      const result = await Book.deleteOne({ _id: bookid });
+        if (result.deletedCount === 0) {
+          return res.send('no book exists');
+        }
+        res.send('delete successful');
+      } catch (error) {
+        res.send('Error deleting book');
+      }           
+    });      
     
 };
