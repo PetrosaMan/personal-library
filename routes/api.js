@@ -48,16 +48,17 @@ module.exports = function (app) {
           commentcount: book.comments.length
         }));        
         res.json(books);                 
-      } catch (err) {
+      } catch (error) {
           res.json({error: "%%Internal Server Error"});
         }            
     })
     .post(async function (req, res) {
-      try {
+      
       let title = req.body.title;     
       if (!title || title == '') { 
         return res.json("missing required field title");
-      }      
+      }
+      try {      
         // create new book
         let newBook = new Book({
           title: title,
@@ -83,7 +84,7 @@ module.exports = function (app) {
       try {
           await Book.deleteMany();                    
           res.json("complete delete successful");
-          console.log("all books deleted");          
+          //console.log("all books deleted");          
       } catch (err) {
           res.json({err:"Internal @@ server Error"});
       }
@@ -91,12 +92,12 @@ module.exports = function (app) {
 
   app
     .route("/api/books/:_id")
-    .get( async function (req, res) {
-      try {
+    .get( async function (req, res) {     
       let bookid = req.params._id;      
       if(!bookid) {
           return res.json("no book exists");
       }
+      try {
         const foundBook = await Book.findById(bookid);
         if(!foundBook) {
           return res.json("no book exists");
@@ -106,40 +107,45 @@ module.exports = function (app) {
           _id: foundBook._id ,
           title: foundBook.title,          
           commentcount: foundBook.commentcount });
-      } catch (err) {
+      } catch (error) {
           res.json( "no book exists" );
-      }
-      //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
+      }      
     })
 
     .post(async function (req, res) {
-      try {
+      
       let bookid = req.params._id;
-      let comment = req.body.comment;       
-      if(!comment || comment == '') {
+      let comment = req.body.comment; 
+
+      if(!comment || comment.trim() === '') {
           return res.json("missing required field comment");
-      }          
+      }
+      try {          
       const foundBook = await Book.findById(bookid);
         if (!foundBook) {
           return res.json("no book exists");          
         }
+
         // add comment  to array
         foundBook.comments.push(comment);
+
         // increment count 
-        foundBook.commentcount = foundBook.comments.length;      
+        foundBook.commentcount = foundBook.comments.length;
+
         // save updated book
-        const book = await foundBook.save();
-        res.json({ 
-          comments: book.comments,
-          _id: book._id,
-          title: book.title,
-          commentcount: book.commentcount
+        const updatedBook = await foundBook.save();
+
+        // Respond with updated book details
+        res.json({           
+          _id: updatedBook._id,
+          title: updatedBook.title,
+          comments: updatedBook.comments,
+          commentcount: updatedBook.commentcount
            });
-      } catch (err) {
-        /// check if format ok in sending ALL fields back
-        return res.json("no book exists");
-      }      
-      //json res format same as .get???
+      } catch (error) {
+        // handle any errors  that occur during the process
+        return res.status(500).json({ error: "an error occurred while updating the book"});
+      }       
     })
 
     .delete( async function (req, res) {

@@ -30,13 +30,11 @@ suite('Functional Tests', function() {
         assert.property(res.body[0], 'title', 'Books in array should contain title');
         assert.property(res.body[0], '_id', 'Books in array should contain _id');
         done();
-      }).timeout(10000);
+      });
   });
   /*
   * ----[END of EXAMPLE TEST]----
-  */
-
-      
+  */      
         
   suite('Routing tests', function() { 
        
@@ -49,15 +47,14 @@ suite('Functional Tests', function() {
         .send({ title: 'test-title' })
         .end(function(err, res) {                     
           assert.equal(res.status, 200);
-          console.log('res.body ** ', res.body); 
-          assert.equal(res.body.title, 'test-title');         
-          //assert.isNotNull(res.body._id);
+          //console.log('res.body ** ', res.body); 
+          assert.equal(res.body.title, 'test-title');          
           id = res.body._id;
-          console.log('title:', res.body.title)
-          console.log('id has been set as ' + id);
-          console.log('comCount ', res.body.commentcount);
+          //console.log('title:', res.body.title)
+          //console.log('id has been set as ' + id);
+          //console.log('comCount ', res.body.commentcount);
           done();
-        }).timeout(10000);              
+        });              
       });
       
       test('Test POST /api/books with no title given', function(done) {
@@ -113,7 +110,7 @@ suite('Functional Tests', function() {
         .end( function(err, res) {                                
           assert.equal(res.status, 200);          
           assert.equal(res.body._id, id); 
-          console.log('id = ', id)         
+          //console.log('id = ', id)         
           assert.equal(res.body.title, 'test-title')
           assert.isArray(res.body.comments, 'response should be an array');                            
           done();
@@ -124,22 +121,21 @@ suite('Functional Tests', function() {
      suite('POST /api/books/[id] => add comment/expect book object with id', function(){
           
       test('Test POST /api/books/[id] with comment', function(done){                
-        console.log('id = ', id);
+        //console.log('id = ', id);        
         chai.request(server)
         .keepOpen()        
-        .post("/api/books/:" + id)                
-        .send({comment: "test-comment" }) // ??????????
+        .post("/api/books/" + id)                
+        .send({comment: "test-comment" }) 
         .end( function(err, res) { 
           //console.log('post comment response');                             
-          //assert.equal(res.status, 200);
-          console.log('comments',res.body.comments);
-          console.log('res.body = ', res.body)
-          assert.equal(res.body.comments[0], 'test-comment');          
-          //assert.isAtLeast(res.body.comments.length, 1);                 
+          assert.equal(res.status, 200);
+          //console.log('comments',res.body.comments);
+          //console.log('res.body = ', res.body)
+          assert.include(res.body.comments, 'test-comment');                        
          done();
         });
       });
-
+    }); 
       /*
       test('Test POST /api/books/[id] without comment field', function(done){
 
@@ -152,7 +148,7 @@ suite('Functional Tests', function() {
         //done();
       });
       */
-    });
+    })
     
 
     /* suite('DELETE /api/books/[id] => delete book object id', function() {
@@ -168,5 +164,6 @@ suite('Functional Tests', function() {
     });
     */
 
-  });  
-});
+  }); 
+
+//})
