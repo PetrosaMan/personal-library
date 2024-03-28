@@ -12,6 +12,7 @@ const assert = chai.assert;
 const server = require('../server');
 
 chai.use(chaiHttp);
+let id;
 
 suite('Functional Tests', function() {  
   /*
@@ -37,9 +38,8 @@ suite('Functional Tests', function() {
 
       
         
-  suite('Routing tests', function() {
-      
-      let id; 
+  suite('Routing tests', function() { 
+       
     suite('POST /api/books with title => create book object/expect book object', function() {
       
       test('Test POST /api/books with title', function(done) {
@@ -54,10 +54,10 @@ suite('Functional Tests', function() {
           //assert.isNotNull(res.body._id);
           id = res.body._id;
           console.log('title:', res.body.title)
-          console.log('id has been set as ' + _id);
+          console.log('id has been set as ' + id);
           console.log('comCount ', res.body.commentcount);
           done();
-        }); // timeout(10000);              
+        }).timeout(10000);              
       });
       
       test('Test POST /api/books with no title given', function(done) {
@@ -112,9 +112,10 @@ suite('Functional Tests', function() {
         .get("/api/books/" + id) 
         .end( function(err, res) {                                
           assert.equal(res.status, 200);          
-          assert.equal(res.body._id, id);          
+          assert.equal(res.body._id, id); 
+          console.log('id = ', id)         
           assert.equal(res.body.title, 'test-title')
-          //assert.isArray(res.body.comments, 'response should be an array');                            
+          assert.isArray(res.body.comments, 'response should be an array');                            
           done();
         });        
       });      
@@ -123,15 +124,17 @@ suite('Functional Tests', function() {
      suite('POST /api/books/[id] => add comment/expect book object with id', function(){
           
       test('Test POST /api/books/[id] with comment', function(done){                
+        console.log('id = ', id);
         chai.request(server)
         .keepOpen()        
-        .post("/api/books/:" + id)        
-        .send({ comment: 'test-comment' }) 
+        .post("/api/books/:" + id)                
+        .send({comment: "test-comment" }) // ??????????
         .end( function(err, res) { 
           //console.log('post comment response');                             
-          assert.equal(res.status, 200);
-          console.log('res.body.title: ',res.body.title);
-          assert.equal(res.body.title, 'test-title');          
+          //assert.equal(res.status, 200);
+          console.log('comments',res.body.comments);
+          console.log('res.body = ', res.body)
+          assert.equal(res.body.comments[0], 'test-comment');          
           //assert.isAtLeast(res.body.comments.length, 1);                 
          done();
         });

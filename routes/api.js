@@ -41,8 +41,11 @@ module.exports = function (app) {
       try {
       const arrayOfBooks = await Book.find();
         //return res.json(arrayOfBooks);
-        let books= arrayOfBooks.map(({ title, _id, commentcount, comments}) => ({
-           title, _id, commentcount
+        let books= arrayOfBooks.map((book) => ({
+          comments: book.comments,
+          _id: book._id,
+          title: book.title,
+          commentcount: book.comments.length
         }));        
         res.json(books);                 
       } catch (err) {
@@ -76,11 +79,11 @@ module.exports = function (app) {
       }
     })
     .delete(async function (req, res) {      
-      // delete all books
-      console.log("all books delete function");
+      // delete all books      
       try {
           await Book.deleteMany();                    
-          res.json("complete delete successful");          
+          res.json("complete delete successful");
+          console.log("all books deleted");          
       } catch (err) {
           res.json({err:"Internal @@ server Error"});
       }
@@ -99,9 +102,10 @@ module.exports = function (app) {
           return res.json("no book exists");
         }        
         return res.json({ 
-          title: foundBook.title,
+          comments: foundBook.comments,
           _id: foundBook._id ,
-          comments: foundBook.comments });
+          title: foundBook.title,          
+          commentcount: foundBook.commentcount });
       } catch (err) {
           res.json( "no book exists" );
       }
@@ -113,25 +117,27 @@ module.exports = function (app) {
       let bookid = req.params._id;
       let comment = req.body.comment;       
       if(!comment || comment == '') {
-          return res.json({ error: "missing required field comment"});
+          return res.json("missing required field comment");
       }          
       const foundBook = await Book.findById(bookid);
         if (!foundBook) {
-          return res.json({ error:"no book exists" });          
+          return res.json("no book exists");          
         }
         // add comment  to array
         foundBook.comments.push(comment);
         // increment count 
-        foundBook.commentcount += 1;      
+        foundBook.commentcount = foundBook.comments.length;      
         // save updated book
         const book = await foundBook.save();
         res.json({ 
-          title: book.title,
+          comments: book.comments,
           _id: book._id,
-          comments: book.comments });
+          title: book.title,
+          commentcount: book.commentcount
+           });
       } catch (err) {
         /// check if format ok in sending ALL fields back
-        res.status(500).json({ error: "Internal Server Error"});
+        return res.json("no book exists");
       }      
       //json res format same as .get???
     })
@@ -142,7 +148,7 @@ module.exports = function (app) {
       console.log("bookId: ", bookid);
       try { 
         await Book.findByIdAndDelete(bookid)
-        res.json("delete successful");
+        res.send("delete successful");
       } catch(err) {
         res.json("no book exists");
       }      
