@@ -49,3 +49,22 @@ Tests
 
 All 10 functional tests required are complete and passing.![image](https://github.com/PetrosaMan/personal-library/assets/61965099/fed0254e-2d52-4365-b712-07af94c6c51a)
 
+
+My notes:
+1) Before running the tests  ensure the you enter one project otherwise tests will not pass.
+   
+2) When using library functions such as Object.findByIdAndUpdate() in Mongoose /Mongodb / js /express make sure that you are using the correct function for the task.
+
+3) Check code carefully when problems occur.
+   This wasted a lot of my time before I realised there was a typo(s) in my code.
+
+4) I need to understand / know better what the cryptic
+   error messages from the editor mean after a script / program is run.
+
+5) This project took me a long time to get the tests to work after I got the api code to work.
+   
+6) Moving to the tests coding was challenging to get the test code right in a few cases because some of the api code was not working correctly.
+   
+7) I think it is better to complete the api code such that is functionally working first before moving to the tests.
+   
+8) I had problems with some of getting some the test functions to pass only to find out after a while, it was due to minor errors in the api code.
